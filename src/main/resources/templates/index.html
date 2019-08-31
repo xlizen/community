@@ -24,7 +24,9 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <form class="navbar-form navbar-left">
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="搜索话题">
+                    <label>
+                        <input type="text" class="form-control" placeholder="搜索话题">
+                    </label>
                 </div>
                 <button type="submit" class="btn btn-default">搜索</button>
             </form>
@@ -32,7 +34,7 @@
                 <li th:if="${session.user == null}"><a href="https://github.com/login/oauth/authorize?client_id=b6810a4f9bd213111ab9&redirect_uri=http://localhost:8090/callback&scope=user&state=1">登录</a></li>
                 <li class="dropdown" th:if="${session.user != null}">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false" th:text="${session.user.getLogin()}">我 <span class="caret"></span></a>
+                       aria-expanded="false" th:text="${session.user.getName()}">我 <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="#">消息中心</a></li>
                         <li><a href="#">个人信息</a></li>

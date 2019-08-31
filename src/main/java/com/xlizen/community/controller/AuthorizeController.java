@@ -12,14 +12,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 @Controller
 public class AuthorizeController {
 
     @Autowired
-    GithubProvider githubProvider;
+    private GithubProvider githubProvider;
 
     @Value("${github.client.id}")
     private String clientId;
@@ -31,12 +32,12 @@ public class AuthorizeController {
     private String redirectUri;
 
     @Autowired
-    UserMapper userMapper;
+    private UserMapper userMapper;
 
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code")String code,
                            @RequestParam(name = "state")String state,
-                           HttpServletRequest request){
+                           HttpServletResponse response){
         AccessTokenDTO tokenDTO = new AccessTokenDTO();
         tokenDTO.setClient_id(clientId);
         tokenDTO.setCode(code);
@@ -46,20 +47,20 @@ public class AuthorizeController {
         String accessToken = githubProvider.getAccessToken(tokenDTO);
         GithubUserDTO githubUser = githubProvider.getGithubUserDTO(accessToken);
         if (githubUser != null) {
-            //登录成功，写cookie和session
             User user = new User();
             user.setName(githubUser.getLogin());
-            user.setToken(UUID.randomUUID().toString());
+            String token = UUID.randomUUID().toString();
+            user.setToken(token);
             user.setAccountId(String.valueOf(githubUser.getId()));
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
             userMapper.insert(user);
-            request.getSession().setAttribute("user",githubUser);
+            //登录成功，写cookie和session
+            response.addCookie(new Cookie("token",token));
             return "redirect:/";
         } else {
             //重新登陆
             return "redirect:/";
         }
-
     }
 }
